@@ -5,13 +5,12 @@
         public static function init() {
 
             function handleError($code, $description, $file = null, $line = null, $context = null) {
-                $displayErrors = ini_get("display_errors");
-                $displayErrors = strtolower($displayErrors);
-                if (error_reporting() === 0 || $displayErrors === "on") {
-                    return false;
-                }		
                 list($error, $log) = mapErrorCode($code);
                 throw new LoggerException($description, $code, $file, $line, $context, $log, $error);
+            }
+
+            function handleException($ex) {
+                throw new LoggerException($ex->getMessage(), $ex->getCode(), $ex->getFile(), $ex->getLine());
             }
             
             function mapErrorCode($code) {
@@ -55,6 +54,7 @@
             error_reporting(E_ALL);
             ini_set("display_errors", "off");            
             set_error_handler("handleError");
+            set_exception_handler("handleException");
         }
 
         public static function write($e, $customMessage = '') {
@@ -63,27 +63,17 @@
 
         public static function getLog($e, $customMessage = '') {
 
-            $context = $e->getContext();
-
-            if (isset($context)) {
-                $context = [
-                    '_GET' => $context['_GET'],
-                    '_POST' => $context['_POST'],                    
-                    '_REQUEST' => $context['_REQUEST'],
-                    '_FILES' => $context['_FILES']
-                ];
-            }
+            $error = get_class($e) == 'LoggerException' ? $e->getError() : 'Exception';
 
             return array(
-                'level' => $e->getError(),
+                'level' => $error,
                 'code' => $e->getCode(),
-                'error' => $e->getError(),
+                'error' => $error,
                 'description' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),                
-                'message' => $e->getError() . ' (' . $e->getCode() . '): ' . $e->getMessage() . ' in [' . $e->getFile() . ', line ' . $e->getLine() . ']',
-                'customMessage' => $customMessage,
-                'context' => $context
+                'message' => $error . ' (' . $e->getCode() . '): ' . $e->getMessage() . ' in [' . $e->getFile() . ', line ' . $e->getLine() . ']',
+                'customMessage' => $customMessage
             );
         }
 

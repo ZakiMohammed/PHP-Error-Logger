@@ -3,9 +3,10 @@
     require_once('logger.php');
 
     try {
-        print_r($foo);
+        
+        $db = new Database();
 
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         var_dump(Logger::getLog($e, 'Nice exception'));
         Logger::write($e, 'Nice exception logged');
     }
