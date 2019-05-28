@@ -43,8 +43,14 @@
         $result = $db->executeReader('SELECT * FROM foo;');        
 
     } catch (Throwable $e) {
-        echo json_encode(Logger::get($e, 'Nice exception'));
-        Logger::save($e, 'Nice exception logged');
+
+        $customData = [
+            'id' => '102',
+            'userName' => 'john'
+        ];
+
+        echo json_encode(Logger::get($e, 'Nice exception', $customData));
+        Logger::save($e, 'Nice exception logged', $customData);
     }
 
     function niceFunction($param1) {

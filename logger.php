@@ -57,11 +57,11 @@
             set_exception_handler("handleException");
         }
 
-        public static function save($e, $customMessage = '') {
+        public static function save($e, $customMessage = '', $customData = []) {
             
             date_default_timezone_set('Asia/Kolkata');
 
-            $logData = Logger::get($e, $customMessage);            
+            $logData = Logger::get($e, $customMessage, $customData);            
 
             $now = date('d_m_Y');
             
@@ -85,7 +85,7 @@
             return file_put_contents($fileName, $jsonData);
         }
 
-        public static function get($e, $customMessage = '') {
+        public static function get($e, $customMessage = '', $customData = []) {
 
             $error = get_class($e) == 'LoggerException' ? $e->getError() : get_class($e);
             $context = [
@@ -124,6 +124,7 @@
                 'line' => $e->getLine(),                
                 'message' => $error . ' (' . $e->getCode() . '): ' . $e->getMessage() . ' in [' . $e->getFile() . ', line ' . $e->getLine() . ']',
                 'customMessage' => $customMessage,
+                'customData' => $customData,
                 'context' => $context
             );
         }
