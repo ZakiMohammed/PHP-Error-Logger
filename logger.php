@@ -57,13 +57,63 @@
             set_exception_handler("handleException");
         }
 
-        public static function write($e, $customMessage = '') {
-            Logger::fileLog(Logger::getLog($e, $customMessage));
+        public static function save($e, $customMessage = '') {
+            
+            date_default_timezone_set('Asia/Kolkata');
+
+            $logData = Logger::get($e, $customMessage);            
+
+            $now = date('d_m_Y');
+            
+            $directoryName = 'log/';
+            $fileName = 'error.json';
+
+            if (!file_exists($directoryName)) {
+                mkdir($directoryName);
+            }
+
+            $fileName = $directoryName . $now . '_' . $fileName;  
+            
+            $jsonData = file_get_contents($fileName);
+            $arrayData = json_decode($jsonData, true);
+            if (!isset($arrayData)) {
+                $arrayData = [];                
+            }
+            array_push($arrayData, $logData);
+            $jsonData = json_encode($arrayData, JSON_PRETTY_PRINT);
+
+            return file_put_contents($fileName, $jsonData);
         }
 
-        public static function getLog($e, $customMessage = '') {
+        public static function get($e, $customMessage = '') {
 
-            $error = get_class($e) == 'LoggerException' ? $e->getError() : 'Exception';
+            $error = get_class($e) == 'LoggerException' ? $e->getError() : get_class($e);
+            $context = [
+                'HTTP_HOST'          => $_SERVER['HTTP_HOST'],
+                'HTTP_CONNECTION'    => $_SERVER['HTTP_CONNECTION'],
+                'HTTP_USER_AGENT'    => $_SERVER['HTTP_USER_AGENT'],
+                'HTTP_ACCEPT'        => $_SERVER['HTTP_ACCEPT'],
+                'SCRIPT_FILENAME'    => $_SERVER['SCRIPT_FILENAME'],
+                'SCRIPT_NAME'        => $_SERVER['SCRIPT_NAME'],
+                'SERVER_ADMIN'       => $_SERVER['SERVER_ADMIN'],
+                'SERVER_NAME'        => $_SERVER['SERVER_NAME'],
+                'SERVER_ADDR'        => $_SERVER['SERVER_ADDR'],
+                'SERVER_PORT'        => $_SERVER['SERVER_PORT'],
+                'REMOTE_ADDR'        => $_SERVER['REMOTE_ADDR'],                
+                'REMOTE_PORT'        => $_SERVER['REMOTE_PORT'],
+                'REQUEST_SCHEME'     => $_SERVER['REQUEST_SCHEME'],
+                'REQUEST_METHOD'     => $_SERVER['REQUEST_METHOD'],
+                'REQUEST_URI'        => $_SERVER['REQUEST_URI'],
+                'QUERY_STRING'       => $_SERVER['QUERY_STRING'],
+                'PHP_SELF'           => $_SERVER['PHP_SELF'],
+                'REQUEST_TIME_FLOAT' => $_SERVER['REQUEST_TIME_FLOAT'],
+                'REQUEST_TIME'       => $_SERVER['REQUEST_TIME'],
+                'GET'                => $_GET,
+                'POST'               => $_POST,
+                'POST_BODY'          => file_get_contents('php://input'),
+                'FILES'              => $_FILES,
+                'COOKIE'             => $_COOKIE,                
+            ];
 
             return array(
                 'level' => $error,
@@ -73,31 +123,9 @@
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),                
                 'message' => $error . ' (' . $e->getCode() . '): ' . $e->getMessage() . ' in [' . $e->getFile() . ', line ' . $e->getLine() . ']',
-                'customMessage' => $customMessage
+                'customMessage' => $customMessage,
+                'context' => $context
             );
-        }
-
-        private static function fileLog($logData) {
-            date_default_timezone_set('Asia/Kolkata');
-
-            $now = date('d_m_Y');
-            
-            $directoryName = 'log/';
-            $fileName = 'error.txt';
-
-            if (!file_exists($directoryName)) {
-                mkdir($directoryName);
-            }
-
-            $fileName = $directoryName . $now . '_' . $fileName;            
-
-            $fh = fopen($fileName, 'a+');
-            if (is_array($logData)) {
-                $logData = print_r($logData, 1);
-            }
-            $status = fwrite($fh, $logData);
-            fclose($fh);
-            return ($status) ? true : false;
         }
     }
     

@@ -8,57 +8,40 @@
 	
 		function __construct() {
 			
-			try {
-				
-				$this->pdo = new PDO('mysql:host='. $GLOBALS['servername'] .';dbname='. $GLOBALS['dbname'], $GLOBALS['username'], $GLOBALS['password']);			
-				$this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
-				$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
-				
-			}
-			catch (PDOException $e) {
-				echo 'PDO Connection Error: ' . $e->getMessage();
-			}
+			$this->pdo = new PDO('mysql:host='. $GLOBALS['servername'] .';dbname='. $GLOBALS['dbname'], $GLOBALS['username'], $GLOBALS['password']);			
+			$this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+			$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 		}
 		
 		function executeReader($query, $parameters = null, $single = false) {
-			try	{
-				
-				$status = false;
-				$stmt = $this->pdo->prepare($query);				
-				
-				if(empty($parameters)) {
-					$status = $stmt->execute();
+			$status = false;
+			$stmt = $this->pdo->prepare($query);				
+			
+			if(empty($parameters)) {
+				$status = $stmt->execute();
+			}
+			else {
+				$status = $stmt->execute($parameters);					
+			}
+			
+			if ($status) {
+				if ($single) {
+					$resultSet = $stmt->fetch();
 				}
 				else {
-					$status = $stmt->execute($parameters);					
+					$resultSet = $stmt->fetchAll();
 				}
 				
-				if ($status) {
-					if ($single) {
-						$resultSet = $stmt->fetch();
-					}
-					else {
-						$resultSet = $stmt->fetchAll();
-					}
-					
-					return [
-						'status' => true,					
-						'resultSet' => $resultSet
-					];
-				} else {
-					return [
-						'status' => false,					
-						'message' => 'Error occured: Cannot fetch record',
-						'errorCode' => json_encode($stmt->errorCode()),
-						'errorInfo' => json_encode($stmt->errorInfo())
-					];
-				}
-				
-			}
-			catch (PDOException $e) {
 				return [
-					'status' => false,
-					'message' => $e->getMessage()					
+					'status' => true,					
+					'resultSet' => $resultSet
+				];
+			} else {
+				return [
+					'status' => false,					
+					'message' => 'Error occured: Cannot fetch record',
+					'errorCode' => json_encode($stmt->errorCode()),
+					'errorInfo' => json_encode($stmt->errorInfo())
 				];
 			}
 		}
