@@ -1,6 +1,9 @@
 <?php
 
     class Logger {
+
+        static $directoryName = 'log/';
+        static $fileName = 'error.json';
         
         public static function init() {
 
@@ -65,14 +68,19 @@
 
             $now = date('d_m_Y');
             
-            $directoryName = 'log/';
-            $fileName = 'error.json';
+            $directoryName = Logger::$directoryName;
+            $fileName = Logger::$fileName;
 
             if (!file_exists($directoryName)) {
                 mkdir($directoryName);
             }
 
             $fileName = $directoryName . $now . '_' . $fileName;  
+
+            if (!file_exists($fileName)) {
+                $file = fopen($fileName, "w");
+                fclose($file);
+            }
             
             $jsonData = file_get_contents($fileName);
             $arrayData = json_decode($jsonData, true);

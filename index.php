@@ -6,7 +6,7 @@
     try {
 
         // Undefined variable: value
-        // print_r($value);
+        print_r($value);
 
          // Undefined offset: 4
         // $array = [1, 2, 3];
@@ -39,8 +39,10 @@
         // $db = new Database();
 
         // PDOException A connection attempt failed because the connected party did not properly respond
-        $db = new Database();
-        $result = $db->executeReader('SELECT * FROM foo;');        
+        // $db = new Database();
+        // $result = $db->executeReader('SELECT * FROM foo;');        
+
+        Logger::save(new LoggerException('Record not inserted while saving participant basic details', 0));
 
     } catch (Throwable $e) {
 
