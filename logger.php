@@ -62,6 +62,17 @@
 
         public static function save($e, $customMessage = '', $customData = []) {
             
+            if (!isset($e)) {
+                $bt = debug_backtrace();
+                $caller = array_shift($bt);
+
+                if (isset($caller)) {
+                    $e = new LoggerException($customMessage, 0, $caller['file'], $caller['line'], null, null, 'NoException');
+                } else {
+                    $e = new LoggerException($customMessage, 0, null, null, null, null, 'NoException');
+                }
+            }
+
             date_default_timezone_set('Asia/Kolkata');
 
             $logData = Logger::get($e, $customMessage, $customData);            

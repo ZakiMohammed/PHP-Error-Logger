@@ -6,7 +6,7 @@
     try {
 
         // Undefined variable: value
-        print_r($value);
+        // print_r($value);
 
          // Undefined offset: 4
         // $array = [1, 2, 3];
@@ -42,7 +42,7 @@
         // $db = new Database();
         // $result = $db->executeReader('SELECT * FROM foo;');        
 
-        Logger::save(new LoggerException('Record not inserted while saving participant basic details', 0));
+        Logger::save(null, 'Record not inserted while saving participant basic details');
 
     } catch (Throwable $e) {
 
